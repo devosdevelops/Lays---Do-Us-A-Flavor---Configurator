@@ -8,12 +8,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "three": "latest",
-    "tailwindcss": "latest",
+    "@tailwindcss/postcss": "latest",
+    "autoprefixer": "latest",
     "postcss": "latest",
-    "autoprefixer": "latest"
+    "tailwindcss": "latest",
+    "three": "latest"
   },
   "devDependencies": {
-    "vite": "latest"
+    "vite": "^7.3.1"
   }
 }

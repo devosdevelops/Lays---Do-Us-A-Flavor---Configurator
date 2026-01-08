@@ -11,9 +11,9 @@ export function MainPageView() {
   const appDiv = document.getElementById('app');
   
   const html = `
-    <div class="min-h-screen bg-lay-neutral">
+    <div class="min-h-screen bg-gray-50">
       <!-- Header with CTA -->
-      <header class="bg-lay-yellow text-gray-900 py-8 shadow-md">
+      <header class="text-gray-900 py-8 shadow-md" style="background-color: var(--lay-yellow);">
         <div class="max-w-6xl mx-auto px-4">
           <h1 class="text-4xl font-bold mb-2">Lay's "Do Us A Flavor" Configurator</h1>
           <p class="text-lg opacity-90">Design your dream chip flavor and vote on community favorites</p>
@@ -24,7 +24,7 @@ export function MainPageView() {
       <main class="max-w-6xl mx-auto px-4 py-12">
         <!-- CTA Section -->
         <section class="mb-12">
-          <div class="bg-white rounded-lg shadow-md p-8 border-l-4 border-lay-red">
+          <div class="bg-white rounded-lg shadow-md p-8 border-l-4" style="border-color: var(--lay-red);">
             <h2 class="text-2xl font-bold mb-4">Create Your Own Flavor</h2>
             <p class="text-gray-600 mb-6">Have a flavor idea? Design your own chip bag and submit it to the community for voting.</p>
             <button id="create-btn" class="btn-primary text-lg">

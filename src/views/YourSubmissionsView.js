@@ -11,9 +11,9 @@ export function YourSubmissionsView() {
   const appDiv = document.getElementById('app');
   
   const html = `
-    <div class="min-h-screen bg-lay-neutral">
+    <div class="min-h-screen bg-gray-50">
       <!-- Header -->
-      <header class="bg-lay-yellow text-gray-900 py-8 shadow-md">
+      <header class="text-gray-900 py-8 shadow-md" style="background-color: var(--lay-yellow);">
         <div class="max-w-6xl mx-auto px-4 flex items-center justify-between">
           <div>
             <h1 class="text-3xl font-bold">Your Submissions</h1>

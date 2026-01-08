@@ -18,7 +18,7 @@ export function ConfiguratorView() {
   const html = `
     <div class="min-h-screen bg-gray-900 flex flex-col">
       <!-- Top Bar -->
-      <div class="bg-lay-yellow text-gray-900 px-6 py-4 flex items-center justify-between shadow-md">
+      <div class="text-gray-900 px-6 py-4 flex items-center justify-between shadow-md" style="background-color: var(--lay-yellow);">
         <div>
           <h1 class="text-2xl font-bold">Chip Bag Configurator</h1>
           <p class="text-sm text-gray-700">Design and preview your flavor submission</p>
