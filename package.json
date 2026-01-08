@@ -1,5 +1,5 @@
 {
-  "name": "threejs-vite-frontend",
+  "name": "lays-flavor-configurator",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -8,9 +8,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "three": "^0.160.0"
+    "three": "latest",
+    "tailwindcss": "latest",
+    "postcss": "latest",
+    "autoprefixer": "latest"
   },
   "devDependencies": {
-    "vite": "^5.0.0"
+    "vite": "latest"
   }
 }

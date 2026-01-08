@@ -10,3 +10,5 @@ dist/
 
 # VSCode
 .vscode/
+# Project docs
+FOUNDATION_COMPLETE.md

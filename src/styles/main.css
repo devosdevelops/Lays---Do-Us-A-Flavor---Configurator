@@ -1,8 +1,2 @@
-/* Main stylesheet placeholder */
-body {
-  margin: 0;
-  overflow: hidden;
-}
-canvas {
-  display: block;
-}
+/* Legacy stylesheet - now using index.css with Tailwind */
+/* This file is deprecated in favor of src/styles/index.css */

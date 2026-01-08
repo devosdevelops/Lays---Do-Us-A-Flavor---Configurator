@@ -7,6 +7,22 @@ This is the backend API for the Lay's flavor design contest. The API handles use
 **Base URL (Production):** `https://lays-do-us-a-flavor-api.onrender.com`  
 **Base URL (Local Development):** `http://localhost:3000`
 
+### Frontend Configuration
+
+The frontend uses the `VITE_API_URL` environment variable to configure the API base URL:
+
+```bash
+# .env.example
+VITE_API_URL=http://localhost:3000
+```
+
+In the frontend code, this is accessed via:
+
+```javascript
+// src/services/api.js
+export const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+```
+
 ---
 
 ## Authentication
