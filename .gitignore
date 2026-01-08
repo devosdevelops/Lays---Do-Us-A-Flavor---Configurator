@@ -1,0 +1,12 @@
+# Node
+node_modules/
+dist/
+.env
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# VSCode
+.vscode/
