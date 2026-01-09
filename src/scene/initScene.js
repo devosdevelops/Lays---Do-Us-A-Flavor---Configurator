@@ -1,13 +1,12 @@
 /**
  * Three.js Scene Initialization
  * Sets up camera, renderer, orbit controls, and animation loop
- * TODO: Replace with full Three.js setup once integrated into ConfiguratorView
  */
 
 import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
-let scene, camera, renderer;
-let animationId = null;
+let scene, camera, renderer, controls, animationId = null;
 
 /**
  * Initialize Three.js scene
@@ -23,29 +22,51 @@ export function initScene(container) {
   const width = container.clientWidth;
   const height = container.clientHeight;
   camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-  camera.position.z = 5;
+  camera.position.set(0, 0, 5);
   
   // Renderer setup
   renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setSize(width, height);
   renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.shadowMap.enabled = true;
   container.appendChild(renderer.domElement);
   
+  // Orbital Controls setup
+  controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.05;
+  controls.autoRotate = true;
+  controls.autoRotateSpeed = 2;
+  controls.enableZoom = true;
+  controls.enablePan = true;
+  
+  // Lighting setup
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+  scene.add(ambientLight);
+  
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+  directionalLight.position.set(5, 5, 5);
+  directionalLight.castShadow = true;
+  directionalLight.shadow.mapSize.width = 2048;
+  directionalLight.shadow.mapSize.height = 2048;
+  scene.add(directionalLight);
+  
+  const pointLight = new THREE.PointLight(0xffffff, 0.4);
+  pointLight.position.set(-5, -5, 5);
+  scene.add(pointLight);
+  
   // Handle window resize
-  window.addEventListener('resize', () => {
+  const handleResize = () => {
     const newWidth = container.clientWidth;
     const newHeight = container.clientHeight;
     camera.aspect = newWidth / newHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(newWidth, newHeight);
-  });
+  };
   
-  // TODO: Add OrbitControls
-  // TODO: Add lighting
-  // TODO: Load GLB model
-  // TODO: Setup animation loop
+  window.addEventListener('resize', handleResize);
   
-  return { scene, camera, renderer };
+  return { scene, camera, renderer, controls, cleanup: () => window.removeEventListener('resize', handleResize) };
 }
 
 /**
@@ -54,10 +75,9 @@ export function initScene(container) {
 export function startAnimation() {
   function animate() {
     animationId = requestAnimationFrame(animate);
-    
-    // TODO: Update scene state
-    // TODO: Rotate/animate objects
-    
+    if (controls) {
+      controls.update();
+    }
     renderer.render(scene, camera);
   }
   animate();
@@ -73,12 +93,4 @@ export function stopAnimation() {
   }
 }
 
-/**
- * Update camera position (for orbit controls)
- */
-export function updateCameraPosition(x, y, z) {
-  camera.position.set(x, y, z);
-  camera.lookAt(0, 0, 0);
-}
-
-export { scene, camera, renderer };
+export { scene, camera, renderer, controls };

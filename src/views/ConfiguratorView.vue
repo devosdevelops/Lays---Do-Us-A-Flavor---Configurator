@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-900 flex flex-col">
+  <div class="h-screen bg-gray-900 flex flex-col">
     <!-- Top Bar -->
     <div class="text-gray-900 px-6 py-4 flex items-center justify-between shadow-md" style="background-color: var(--lay-yellow);">
       <div>
@@ -14,7 +14,7 @@
       <!-- Controls Panel -->
       <div class="w-80 bg-white border-r border-gray-300 overflow-y-auto p-6 space-y-6">
         <div>
-          <label class="block text-sm font-bold text-gray-900 mb-2">Design Name</label>
+          <label class="block text-sm font-bold text-gray-900 mb-2">Flavor Name</label>
           <input 
             v-model="config.name"
             type="text" 
@@ -96,9 +96,6 @@
       <!-- Canvas Container -->
       <div class="flex-1 bg-gray-800 flex items-center justify-center relative">
         <div id="three-canvas" style="width: 100%; height: 100%;"></div>
-        <div class="absolute bottom-4 right-4 text-white text-sm bg-gray-900 bg-opacity-70 px-4 py-2 rounded">
-          Three.js Scene - Model will load here
-        </div>
       </div>
     </div>
 
@@ -114,7 +111,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { 
   MOCK_BAG_COLORS, 
@@ -122,12 +119,69 @@ import {
   MOCK_FLAVOR_NOTES, 
   createInitialConfig 
 } from '../utils/mock-data.js';
+import { initScene, startAnimation, stopAnimation } from '../scene/initScene.js';
+import { loadModel, updateModelColor, updateModelText, disposeModel } from '../scene/model.js';
 
 const router = useRouter();
 const config = ref(createInitialConfig());
 const bagColors = ref(MOCK_BAG_COLORS);
 const fontStyles = ref(MOCK_FONT_STYLES);
 const flavorNotes = ref(MOCK_FLAVOR_NOTES);
+
+let sceneContext = null;
+
+// Watch for color changes and update the 3D model
+watch(() => config.value.bagColor, (newColor) => {
+  if (newColor) {
+    updateModelColor(newColor);
+  }
+});
+
+// Watch for flavor name changes and update the 3D model text
+watch(() => config.value.name, (newName) => {
+  if (newName) {
+    updateModelText(newName);
+  }
+});
+
+onMounted(async () => {
+  try {
+    // Get canvas container
+    const container = document.getElementById('three-canvas');
+    if (!container) {
+      console.error('Canvas container not found');
+      return;
+    }
+    
+    // Initialize Three.js scene
+    sceneContext = initScene(container);
+    console.log('Scene initialized');
+    
+    // Load the chip bag model
+    await loadModel(sceneContext.scene);
+    console.log('Model loaded');
+    
+    // Apply initial color
+    updateModelColor(config.value.bagColor);
+    
+    // Apply initial text
+    updateModelText(config.value.name);
+    
+    // Start animation loop
+    startAnimation();
+    console.log('Animation started');
+  } catch (error) {
+    console.error('Failed to initialize configurator:', error);
+  }
+});
+
+onUnmounted(() => {
+  stopAnimation();
+  disposeModel();
+  if (sceneContext && sceneContext.cleanup) {
+    sceneContext.cleanup();
+  }
+});
 
 const goBack = () => {
   router.push('/');
