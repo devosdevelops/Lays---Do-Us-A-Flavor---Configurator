@@ -278,4 +278,92 @@ export function disposeModel() {
   }
 }
 
+/**
+ * Update model with custom image
+ * @param {HTMLImageElement} image - Image element to apply
+ */
+export function updateModelImage(image) {
+  if (!loadedModel) {
+    console.warn('Model not loaded yet');
+    return;
+  }
+  
+  // Create canvas with proper aspect ratio handling
+  // Use a standard size and maintain image aspect ratio
+  const canvasWidth = 2048;
+  const canvasHeight = 2048;
+  const canvas = document.createElement('canvas');
+  canvas.width = canvasWidth;
+  canvas.height = canvasHeight;
+  const ctx = canvas.getContext('2d');
+  
+  // Fill background with transparent
+  ctx.fillStyle = 'rgba(255, 255, 255, 0)';
+  ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+  
+  // Calculate dimensions to "contain" the image (fit within canvas, maintain aspect ratio)
+  const imageAspect = image.width / image.height;
+  const canvasAspect = canvasWidth / canvasHeight;
+  
+  let drawWidth, drawHeight, offsetX, offsetY;
+  
+  if (imageAspect > canvasAspect) {
+    // Image is wider - fit to width
+    drawWidth = canvasWidth;
+    drawHeight = canvasWidth / imageAspect;
+    offsetX = 0;
+    offsetY = (canvasHeight - drawHeight) / 2;
+  } else {
+    // Image is taller - fit to height
+    drawHeight = canvasHeight;
+    drawWidth = canvasHeight * imageAspect;
+    offsetX = (canvasWidth - drawWidth) / 2;
+    offsetY = 0;
+  }
+  
+  // Draw image without flipping
+  ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
+  
+  // Create texture from canvas
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  
+  let appliedCount = 0;
+  
+  // Apply ONLY to the BagImg material
+  loadedModel.traverse((child) => {
+    if (child.isMesh && child.material) {
+      const materialName = (child.material.name || '').toLowerCase();
+      
+      // Only apply to materials specifically for images
+      if (materialName.includes('img') || materialName === 'bagimg') {
+        child.material.map = texture;
+        child.material.needsUpdate = true;
+        appliedCount++;
+        console.log(`✓ Applied image to: ${child.name} (${child.material.name})`);
+      }
+    }
+  });
+  
+  if (appliedCount === 0) {
+    console.warn('⚠️ No image materials found. Make sure the model has a BagImg material.');
+  } else {
+    console.log(`✓ Model image updated (applied to ${appliedCount} materials)`);
+  }
+}
+
+/**
+ * Helper to convert HTMLImageElement to canvas
+ * @param {HTMLImageElement} img - Image to convert
+ * @returns {HTMLCanvasElement} Canvas with image
+ */
+function getImageAsCanvas(img) {
+  const canvas = document.createElement('canvas');
+  canvas.width = img.width;
+  canvas.height = img.height;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0);
+  return canvas;
+}
+
 export { loadedModel };

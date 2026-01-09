@@ -76,10 +76,11 @@
           <label class="block text-sm font-bold text-gray-900 mb-2">Design Image (Optional)</label>
           <input 
             type="file" 
+            @change="handleImageUpload"
             class="w-full text-sm text-gray-500 file:px-3 file:py-2 file:rounded file:border-0 file:bg-lay-yellow file:text-gray-900 file:font-semibold file:cursor-pointer hover:file:bg-yellow-400"
             accept="image/*"
           />
-          <p class="text-xs text-gray-500 mt-2">TODO: Image upload will be implemented</p>
+          <p class="text-xs text-gray-600 mt-2">{{ config.imageUpload ? '✓ Image loaded' : 'Upload to add a custom image' }}</p>
         </div>
       </div>
 
@@ -110,7 +111,7 @@ import {
   createInitialConfig 
 } from '../utils/mock-data.js';
 import { initScene, startAnimation, stopAnimation } from '../scene/initScene.js';
-import { loadModel, updateModelColor, updateModelText, disposeModel } from '../scene/model.js';
+import { loadModel, updateModelColor, updateModelText, updateModelImage, disposeModel } from '../scene/model.js';
 
 const router = useRouter();
 const config = ref(createInitialConfig());
@@ -207,6 +208,23 @@ const toggleFlavorNote = (note) => {
     }
     config.value.flavorNotes.push(note);
   }
+};
+
+const handleImageUpload = (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      config.value.imageUpload = e.target.result;
+      updateModelImage(img);
+      console.log('Image loaded:', file.name);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
 };
 </script>
 
