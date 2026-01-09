@@ -110,8 +110,8 @@ import {
   MOCK_FLAVOR_NOTES, 
   createInitialConfig 
 } from '../utils/mock-data.js';
-import { initScene, startAnimation, stopAnimation } from '../scene/initScene.js';
-import { loadModel, updateModelColor, updateModelText, updateModelImage, disposeModel } from '../scene/model.js';
+import { initScene, startAnimation, stopAnimation, updateSceneBackground } from '../scene/initScene.js';
+import { loadModel, updateModelColor, updateModelText, updateModelImage, clearModelImage, disposeModel } from '../scene/model.js';
 
 const router = useRouter();
 const config = ref(createInitialConfig());
@@ -125,6 +125,7 @@ let sceneContext = null;
 watch(() => config.value.bagColor, (newColor) => {
   if (newColor) {
     updateModelColor(newColor);
+    updateSceneBackground(newColor);
     // Also update text with new background color
     updateModelText(config.value.name, newColor, config.value.fontStyle);
   }
@@ -163,6 +164,7 @@ onMounted(async () => {
     
     // Apply initial color
     updateModelColor(config.value.bagColor);
+    updateSceneBackground(config.value.bagColor);
     
     // Apply initial text
     updateModelText(config.value.name, config.value.bagColor, config.value.fontStyle);
@@ -189,6 +191,17 @@ const goBack = () => {
 
 const resetConfig = () => {
   config.value = createInitialConfig();
+  // Clear the image upload input
+  const fileInput = document.querySelector('input[type="file"]');
+  if (fileInput) {
+    fileInput.value = '';
+  }
+  // Remove image from model
+  clearModelImage();
+  // Update 3D model to reflect reset
+  updateModelColor(config.value.bagColor);
+  updateSceneBackground(config.value.bagColor);
+  updateModelText(config.value.name, config.value.bagColor, config.value.fontStyle);
   console.log('Config reset:', config.value);
 };
 

@@ -16,7 +16,8 @@ let scene, camera, renderer, controls, animationId = null;
 export function initScene(container) {
   // Scene setup
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x1a1a1a);
+  // Background color will be set by updateSceneBackground
+  scene.background = new THREE.Color(0xFFFF59);
   
   // Camera setup
   const width = container.clientWidth;
@@ -39,20 +40,33 @@ export function initScene(container) {
   controls.enableZoom = true;
   controls.enablePan = true;
   
-  // Lighting setup
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+  // Lighting setup - increased intensity
+  const ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
   scene.add(ambientLight);
   
-  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 1.2);
   directionalLight.position.set(5, 5, 5);
   directionalLight.castShadow = true;
   directionalLight.shadow.mapSize.width = 2048;
   directionalLight.shadow.mapSize.height = 2048;
   scene.add(directionalLight);
   
-  const pointLight = new THREE.PointLight(0xffffff, 0.4);
+  const pointLight = new THREE.PointLight(0xffffff, 0.6);
   pointLight.position.set(-5, -5, 5);
   scene.add(pointLight);
+  
+  // Create white platform/podium beneath the bag
+  const platformGeometry = new THREE.CylinderGeometry(2.5, 2.5, 0.2, 64);
+  const platformMaterial = new THREE.MeshStandardMaterial({ 
+    color: 0xffffff,
+    metalness: 0.2,
+    roughness: 0.7
+  });
+  const platform = new THREE.Mesh(platformGeometry, platformMaterial);
+  platform.position.y = -1.8;
+  platform.castShadow = true;
+  platform.receiveShadow = true;
+  scene.add(platform);
   
   // Handle window resize
   const handleResize = () => {
@@ -90,6 +104,28 @@ export function stopAnimation() {
     cancelAnimationFrame(animationId);
     animationId = null;
   }
+}
+
+/**
+ * Update scene background color based on bag color
+ * @param {string} bagHexColor - Hex color of the bag
+ */
+export function updateSceneBackground(bagHexColor) {
+  // Convert hex to RGB
+  const hex = bagHexColor.replace('#', '');
+  const r = parseInt(hex.substring(0, 2), 16) / 255;
+  const g = parseInt(hex.substring(2, 4), 16) / 255;
+  const b = parseInt(hex.substring(4, 6), 16) / 255;
+  
+  // Lighten and brighten the color (increase all channels toward 1)
+  const lightened = {
+    r: Math.min(1, r + 0.35),
+    g: Math.min(1, g + 0.35),
+    b: Math.min(1, b + 0.35)
+  };
+  
+  const bgColor = new THREE.Color(lightened.r, lightened.g, lightened.b);
+  scene.background = bgColor;
 }
 
 export { scene, camera, renderer, controls };

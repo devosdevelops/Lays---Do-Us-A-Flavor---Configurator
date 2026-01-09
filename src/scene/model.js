@@ -328,6 +328,39 @@ export function updateModelImage(image) {
 }
 
 /**
+ * Remove image from model
+ */
+export function clearModelImage() {
+  if (!loadedModel) {
+    console.warn('Model not loaded yet');
+    return;
+  }
+  
+  let clearedCount = 0;
+  
+  // Remove texture from BagImg material
+  loadedModel.traverse((child) => {
+    if (child.isMesh && child.material) {
+      const materialName = (child.material.name || '').toLowerCase();
+      
+      // Only clear from image materials
+      if (materialName.includes('img') || materialName === 'bagimg') {
+        child.material.map = null;
+        child.material.needsUpdate = true;
+        clearedCount++;
+        console.log(`✓ Cleared image from: ${child.name} (${child.material.name})`);
+      }
+    }
+  });
+  
+  if (clearedCount === 0) {
+    console.warn('⚠️ No image materials found.');
+  } else {
+    console.log(`✓ Model image cleared (${clearedCount} materials)`);
+  }
+}
+
+/**
  * Helper to convert HTMLImageElement to canvas
  * @param {HTMLImageElement} img - Image to convert
  * @returns {HTMLCanvasElement} Canvas with image
