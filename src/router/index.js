@@ -1,39 +1,47 @@
 /**
- * Router for Lay's Flavor Configurator
- * Handles navigation between views: main, login, signup, submissions, configurator
- * TODO: Implement SPA router logic (pathname-based navigation)
+ * Vue Router for Lay's Flavor Configurator
+ * Handles SPA navigation between views
  */
 
-import { MainPageView } from '../views/MainPageView.js';
-import { LoginView } from '../views/LoginView.js';
-import { SignupView } from '../views/SignupView.js';
-import { YourSubmissionsView } from '../views/YourSubmissionsView.js';
-import { ConfiguratorView } from '../views/ConfiguratorView.js';
+import { createRouter, createWebHistory } from 'vue-router';
+import MainPageView from '../views/MainPageView.vue';
+import LoginView from '../views/LoginView.vue';
+import SignupView from '../views/SignupView.vue';
+import YourSubmissionsView from '../views/YourSubmissionsView.vue';
+import ConfiguratorView from '../views/ConfiguratorView.vue';
 
-const ROUTES = {
-  '/': MainPageView,
-  '/login': LoginView,
-  '/signup': SignupView,
-  '/submissions': YourSubmissionsView,
-  '/configurator': ConfiguratorView
-};
+const routes = [
+  {
+    path: '/',
+    name: 'Home',
+    component: MainPageView
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    component: LoginView
+  },
+  {
+    path: '/signup',
+    name: 'Signup',
+    component: SignupView
+  },
+  {
+    path: '/submissions',
+    name: 'Submissions',
+    component: YourSubmissionsView
+  },
+  {
+    path: '/configurator',
+    name: 'Configurator',
+    component: ConfiguratorView
+  }
+];
 
-/**
- * Get view component based on pathname
- * @param {string} pathname - URL pathname
- * @returns {Object} View component
- */
-export function getRouteView(pathname) {
-  return ROUTES[pathname] || ROUTES['/'];
-}
+export const router = createRouter({
+  history: createWebHistory(),
+  routes
+});
 
-/**
- * Navigate to a specific route
- * @param {string} pathname - Route path
- * TODO: Implement history.pushState and view rendering
- */
-export function navigate(pathname) {
-  // TODO: Update URL
-  // TODO: Render appropriate view component
-  console.log(`Navigating to: ${pathname}`);
-}
+export default router;
+

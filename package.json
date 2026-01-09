@@ -12,9 +12,12 @@
     "autoprefixer": "latest",
     "postcss": "latest",
     "tailwindcss": "latest",
-    "three": "latest"
+    "three": "latest",
+    "vue": "latest",
+    "vue-router": "latest"
   },
   "devDependencies": {
+    "@vitejs/plugin-vue": "latest",
     "vite": "^7.3.1"
   }
 }
