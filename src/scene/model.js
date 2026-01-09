@@ -288,45 +288,12 @@ export function updateModelImage(image) {
     return;
   }
   
-  // Create canvas with proper aspect ratio handling
-  // Use a standard size and maintain image aspect ratio
-  const canvasWidth = 2048;
-  const canvasHeight = 2048;
-  const canvas = document.createElement('canvas');
-  canvas.width = canvasWidth;
-  canvas.height = canvasHeight;
-  const ctx = canvas.getContext('2d');
-  
-  // Fill background with transparent
-  ctx.fillStyle = 'rgba(255, 255, 255, 0)';
-  ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-  
-  // Calculate dimensions to "contain" the image (fit within canvas, maintain aspect ratio)
-  const imageAspect = image.width / image.height;
-  const canvasAspect = canvasWidth / canvasHeight;
-  
-  let drawWidth, drawHeight, offsetX, offsetY;
-  
-  if (imageAspect > canvasAspect) {
-    // Image is wider - fit to width
-    drawWidth = canvasWidth;
-    drawHeight = canvasWidth / imageAspect;
-    offsetX = 0;
-    offsetY = (canvasHeight - drawHeight) / 2;
-  } else {
-    // Image is taller - fit to height
-    drawHeight = canvasHeight;
-    drawWidth = canvasHeight * imageAspect;
-    offsetX = (canvasWidth - drawWidth) / 2;
-    offsetY = 0;
-  }
-  
-  // Draw image without flipping
-  ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
-  
-  // Create texture from canvas
-  const texture = new THREE.CanvasTexture(canvas);
+  // Create texture directly from the image element
+  const texture = new THREE.Texture(image);
   texture.colorSpace = THREE.SRGBColorSpace;
+  texture.needsUpdate = true;
+  
+  console.log(`Applying image directly: ${image.width}x${image.height}`);
   
   let appliedCount = 0;
   
@@ -339,6 +306,14 @@ export function updateModelImage(image) {
       if (materialName.includes('img') || materialName === 'bagimg') {
         child.material.map = texture;
         child.material.needsUpdate = true;
+        
+        // Fix UV mapping to prevent flipping and stretching
+        // Reset scale, offset, and rotation
+        if (child.material.map) {
+          child.material.map.repeat.set(1, -1); // Flip Y axis
+          child.material.map.offset.set(0, 1);  // Offset to compensate for flip
+        }
+        
         appliedCount++;
         console.log(`✓ Applied image to: ${child.name} (${child.material.name})`);
       }
