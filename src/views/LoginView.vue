@@ -4,6 +4,10 @@
       <h1 class="text-3xl font-bold text-center mb-2">Welcome Back</h1>
       <p class="text-center text-gray-600 mb-8">Sign in to manage your submissions</p>
       
+      <div v-if="error" class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+        {{ error }}
+      </div>
+      
       <form @submit.prevent="handleLogin" class="space-y-4">
         <div>
           <label for="email" class="block text-sm font-semibold mb-2">Email</label>
@@ -29,7 +33,9 @@
           />
         </div>
         
-        <button type="submit" class="btn-primary w-full text-center">Sign In</button>
+        <button type="submit" :disabled="loading" class="btn-primary w-full text-center" :class="{ 'opacity-50 cursor-not-allowed': loading }">
+          {{ loading ? 'Signing in...' : 'Sign In' }}
+        </button>
       </form>
       
       <div class="mt-6 text-center">
@@ -46,18 +52,36 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { login } from '../services/api.js';
+import { useAuth } from '../composables/useAuth.js';
 
 const router = useRouter();
+const { login } = useAuth();
+
 const form = ref({
   email: '',
   password: ''
 });
 
+const loading = ref(false);
+const error = ref(null);
+
 const handleLogin = async () => {
-  // TODO: Call real login API
-  console.log('Login submitted:', form.value);
-  alert('Login submitted (UI only - see console)');
+  error.value = null;
+  loading.value = true;
+
+  try {
+    const result = await login(form.value.email, form.value.password);
+    
+    if (result.success) {
+      router.push('/');
+    } else {
+      error.value = result.error || 'Login failed';
+    }
+  } catch (err) {
+    error.value = err.message || 'An unexpected error occurred';
+  } finally {
+    loading.value = false;
+  }
 };
 </script>
 
