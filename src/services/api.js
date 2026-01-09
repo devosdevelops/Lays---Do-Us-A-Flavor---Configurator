@@ -23,12 +23,47 @@ export async function signup(username, email, password) {
   return { success: true, token: 'mock-token-12345' };
 }
 
-// TODO: Implement real submission creation
+// Submit a new flavor design
 export async function submitDesign(designData) {
-  console.log('API: submitDesign called', designData);
-  // TODO: POST /api/submissions with Authorization header
-  // TODO: Include: name, description, flavorNotes, bagColor, fontStyle, imageUpload
-  return { success: true, submissionId: 'sub-' + Math.random().toString(36).substr(2, 9) };
+  try {
+    // Get token from localStorage
+    const authData = localStorage.getItem('auth');
+    if (!authData) {
+      throw new Error('Not authenticated');
+    }
+    
+    const { token } = JSON.parse(authData);
+    
+    // Map config to API format
+    const payload = {
+      flavorName: designData.name,
+      bagColor: designData.bagColor,
+      fontChoice: designData.fontStyle,
+      keyFlavors: designData.flavorNotes
+    };
+    
+    const response = await fetch(`${API_BASE}/api/submissions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      credentials: 'include',
+      body: JSON.stringify(payload)
+    });
+    
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message || 'Failed to submit design');
+    }
+    
+    const data = await response.json();
+    console.log('Design submitted:', data);
+    return { success: true, submissionId: data._id };
+  } catch (error) {
+    console.error('Submit design error:', error);
+    throw error;
+  }
 }
 
 // TODO: Implement real voting

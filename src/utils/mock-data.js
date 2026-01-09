@@ -69,7 +69,7 @@ export const MOCK_BAG_COLORS = [
   { name: 'Burnt Orange', hex: '#DC4419' },
   { name: 'Plum Purple', hex: '#662E91' },
   { name: 'Warm Cream', hex: '#F5EDE5' },
-  { name: 'Charcoal', hex: '#2C2C2C' }
+  { name: 'Charcoal', hex: '#555555' }
 ];
 
 export const MOCK_FONT_STYLES = [

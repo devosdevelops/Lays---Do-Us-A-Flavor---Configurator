@@ -112,6 +112,7 @@ import {
 } from '../utils/mock-data.js';
 import { initScene, startAnimation, stopAnimation, updateSceneBackground } from '../scene/initScene.js';
 import { loadModel, updateModelColor, updateModelText, updateModelImage, clearModelImage, disposeModel } from '../scene/model.js';
+import { submitDesign as apiSubmitDesign } from '../services/api.js';
 
 const router = useRouter();
 const config = ref(createInitialConfig());
@@ -205,10 +206,20 @@ const resetConfig = () => {
   console.log('Config reset:', config.value);
 };
 
-const submitDesign = () => {
-  // TODO: Call API submitDesign(config.value)
-  console.log('Submitting design:', config.value);
-  alert('Design submitted (UI only - see console)');
+const submitDesign = async () => {
+  try {
+    if (!config.value.name) {
+      alert('Please enter a flavor name');
+      return;
+    }
+    
+    await apiSubmitDesign(config.value);
+    alert('Design submitted successfully!');
+    router.push('/submissions');
+  } catch (error) {
+    alert('Failed to submit design: ' + error.message);
+    console.error('Submit error:', error);
+  }
 };
 
 const toggleFlavorNote = (note) => {
