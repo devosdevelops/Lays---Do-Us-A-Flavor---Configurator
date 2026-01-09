@@ -36,10 +36,23 @@
       <!-- Submissions Grid -->
       <section>
         <h2 class="text-2xl font-bold mb-6">Community Submissions</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        
+        <div v-if="loading" class="text-center py-12">
+          <p class="text-gray-600 text-lg">Loading submissions...</p>
+        </div>
+        
+        <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+          <p class="text-red-700">{{ error }}</p>
+        </div>
+        
+        <div v-else-if="submissions.length === 0" class="text-center py-12">
+          <p class="text-gray-600 text-lg">No submissions yet. Be the first to create one!</p>
+        </div>
+        
+        <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <SubmissionCard 
             v-for="submission in submissions" 
-            :key="submission.id" 
+            :key="submission._id" 
             :submission="submission"
           />
         </div>
@@ -58,14 +71,27 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import SubmissionCard from '../components/SubmissionCard.vue';
-import { MOCK_SUBMISSIONS } from '../utils/mock-data.js';
 import { useAuth } from '../composables/useAuth.js';
+import { getSubmissions } from '../services/api.js';
 
 const router = useRouter();
 const { isLoggedIn, user: currentUser, logout } = useAuth();
-const submissions = ref(MOCK_SUBMISSIONS);
+const submissions = ref([]);
+const loading = ref(true);
+const error = ref(null);
+
+onMounted(async () => {
+  try {
+    submissions.value = await getSubmissions();
+  } catch (err) {
+    console.error('Failed to load submissions:', err);
+    error.value = 'Failed to load submissions. Please try again.';
+  } finally {
+    loading.value = false;
+  }
+});
 
 const goToConfigurator = () => {
   if (!isLoggedIn.value) {
