@@ -8,7 +8,6 @@ export const MOCK_SUBMISSIONS = [
     id: 'sub-001',
     username: 'flavor_creator_1',
     name: 'Smoky BBQ Delight',
-    description: 'A bold combination of smoked paprika and tangy barbecue spice',
     flavorNotes: ['Smoked Paprika', 'BBQ', 'Savory'],
     bagColor: '#DC4419',
     fontStyle: 'bold',
@@ -20,7 +19,6 @@ export const MOCK_SUBMISSIONS = [
     id: 'sub-002',
     username: 'spice_master',
     name: 'Lime & Cilantro Crunch',
-    description: 'Fresh Mexican-inspired flavors with a zesty lime kick',
     flavorNotes: ['Lime', 'Cilantro', 'Jalapeño'],
     bagColor: '#2FBF71',
     fontStyle: 'modern',
@@ -32,7 +30,6 @@ export const MOCK_SUBMISSIONS = [
     id: 'sub-003',
     username: 'umami_fan',
     name: 'Truffle & Garlic',
-    description: 'Gourmet experience with earthy truffle and roasted garlic',
     flavorNotes: ['Truffle', 'Garlic', 'Umami'],
     bagColor: '#8B6914',
     fontStyle: 'elegant',
@@ -44,7 +41,6 @@ export const MOCK_SUBMISSIONS = [
     id: 'sub-004',
     username: 'sweet_tooth',
     name: 'Honey & Sriracha',
-    description: 'Sweet meets heat with a perfect balance of flavors',
     flavorNotes: ['Honey', 'Sriracha', 'Chili'],
     bagColor: '#FFA500',
     fontStyle: 'playful',
@@ -56,7 +52,6 @@ export const MOCK_SUBMISSIONS = [
     id: 'sub-005',
     username: 'dill_pickle_lover',
     name: 'Classic Dill Pickle',
-    description: 'Nostalgic flavor with tangy dill and briny notes',
     flavorNotes: ['Dill', 'Pickle', 'Vinegar'],
     bagColor: '#009245',
     fontStyle: 'retro',
@@ -104,7 +99,6 @@ export const MOCK_USER_SUBMISSIONS = [
   {
     id: 'user-sub-001',
     name: 'My Wasabi Dream',
-    description: 'Testing wasabi with a hint of ginger',
     flavorNotes: ['Wasabi', 'Ginger'],
     bagColor: '#2FBF71',
     fontStyle: 'modern',
@@ -115,7 +109,6 @@ export const MOCK_USER_SUBMISSIONS = [
   {
     id: 'user-sub-002',
     name: 'Curry Craze',
-    description: 'Exploring Indian spice profiles',
     flavorNotes: ['Curry', 'Turmeric', 'Coconut'],
     bagColor: '#FFA500',
     fontStyle: 'bold',
@@ -140,7 +133,6 @@ export const MOCK_CURRENT_USER = {
  */
 export const createInitialConfig = () => ({
   name: '',
-  description: '',
   flavorNotes: [],
   bagColor: '#FFCC00',
   fontStyle: 'bold',

@@ -11,7 +11,6 @@
     
     <div class="p-4">
       <h3 class="text-lg font-bold text-gray-900">{{ submission.name }}</h3>
-      <p class="text-sm text-gray-600 mt-2">{{ submission.description }}</p>
       
       <div class="mt-4 flex flex-wrap gap-2">
         <span 

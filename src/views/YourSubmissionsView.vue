@@ -26,7 +26,7 @@
         >
           <div class="flex-1">
             <h3 class="text-xl font-bold text-gray-900">{{ submission.name }}</h3>
-            <p class="text-gray-600 mt-2">{{ submission.description }}</p>
+
             <div class="mt-4 flex items-center gap-4 text-sm text-gray-600">
               <span 
                 class="inline-block px-3 py-1 rounded-full text-xs font-semibold"

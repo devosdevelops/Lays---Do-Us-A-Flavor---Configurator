@@ -120,11 +120,35 @@ function getContrastingTextColor(hexColor) {
 }
 
 /**
+ * Get font style string for canvas
+ * @param {string} fontStyle - Font style identifier
+ * @returns {string} Canvas font string
+ */
+function getFontString(fontSize, fontStyle) {
+  const sizeStr = `${fontSize}px`;
+  
+  switch(fontStyle) {
+    case 'elegant':
+      return `italic bold ${sizeStr} Georgia, serif`;
+    case 'modern':
+      return `bold ${sizeStr} 'Trebuchet MS', sans-serif`;
+    case 'playful':
+      return `bold ${sizeStr} 'Comic Sans MS', cursive`;
+    case 'retro':
+      return `bold ${sizeStr} 'Courier New', monospace`;
+    case 'bold':
+    default:
+      return `bold ${sizeStr} Arial, sans-serif`;
+  }
+}
+
+/**
  * Update model text - applies text to existing text material on the bag
  * @param {string} flavorName - Name of the flavor to display on the bag
  * @param {string} bagColor - Hex color of the bag for text background
+ * @param {string} fontStyle - Font style to apply
  */
-export function updateModelText(flavorName, bagColor) {
+export function updateModelText(flavorName, bagColor, fontStyle = 'bold') {
   if (!loadedModel) {
     console.warn('Model not loaded yet');
     return;
@@ -162,7 +186,7 @@ export function updateModelText(flavorName, bagColor) {
   
   // Try to fit the text, reducing font size if needed
   while (fontSize >= minFontSize) {
-    ctx.font = `bold ${fontSize}px Arial, sans-serif`;
+    ctx.font = getFontString(fontSize, fontStyle);
     lines = [];
     let currentLine = '';
     
@@ -238,7 +262,7 @@ export function updateModelText(flavorName, bagColor) {
     }
   });
   
-  console.log('Model text updated to:', flavorName, 'with', textColor, 'text (font size:', fontSize, 'px)');
+  console.log('Model text updated to:', flavorName, 'with', textColor, 'text (font:', fontStyle, ', size:', fontSize, 'px)');
 }
 
 /**

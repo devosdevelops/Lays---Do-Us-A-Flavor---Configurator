@@ -24,16 +24,6 @@
         </div>
 
         <div>
-          <label class="block text-sm font-bold text-gray-900 mb-2">Description</label>
-          <textarea 
-            v-model="config.description"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-lay-yellow resize-none"
-            rows="3"
-            placeholder="Describe your flavor concept..."
-          ></textarea>
-        </div>
-
-        <div>
           <label class="block text-sm font-bold text-gray-900 mb-3">Bag Color</label>
           <div class="space-y-2">
             <label v-for="color in bagColors" :key="color.hex" class="flex items-center gap-3 cursor-pointer hover:bg-gray-100 p-2 rounded transition">
@@ -135,14 +125,21 @@ watch(() => config.value.bagColor, (newColor) => {
   if (newColor) {
     updateModelColor(newColor);
     // Also update text with new background color
-    updateModelText(config.value.name, newColor);
+    updateModelText(config.value.name, newColor, config.value.fontStyle);
   }
 });
 
 // Watch for flavor name changes and update the 3D model text
 watch(() => config.value.name, (newName) => {
   if (newName) {
-    updateModelText(newName, config.value.bagColor);
+    updateModelText(newName, config.value.bagColor, config.value.fontStyle);
+  }
+});
+
+// Watch for font style changes and update the 3D model text
+watch(() => config.value.fontStyle, (newFont) => {
+  if (newFont) {
+    updateModelText(config.value.name, config.value.bagColor, newFont);
   }
 });
 
@@ -167,7 +164,7 @@ onMounted(async () => {
     updateModelColor(config.value.bagColor);
     
     // Apply initial text
-    updateModelText(config.value.name, config.value.bagColor);
+    updateModelText(config.value.name, config.value.bagColor, config.value.fontStyle);
     
     // Start animation loop
     startAnimation();
