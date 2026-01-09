@@ -35,8 +35,7 @@ export function initScene(container) {
   controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
   controls.dampingFactor = 0.05;
-  controls.autoRotate = true;
-  controls.autoRotateSpeed = 2;
+  controls.autoRotate = false;
   controls.enableZoom = true;
   controls.enablePan = true;
   
