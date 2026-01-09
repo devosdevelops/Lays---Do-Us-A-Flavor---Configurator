@@ -134,13 +134,15 @@ let sceneContext = null;
 watch(() => config.value.bagColor, (newColor) => {
   if (newColor) {
     updateModelColor(newColor);
+    // Also update text with new background color
+    updateModelText(config.value.name, newColor);
   }
 });
 
 // Watch for flavor name changes and update the 3D model text
 watch(() => config.value.name, (newName) => {
   if (newName) {
-    updateModelText(newName);
+    updateModelText(newName, config.value.bagColor);
   }
 });
 
@@ -165,7 +167,7 @@ onMounted(async () => {
     updateModelColor(config.value.bagColor);
     
     // Apply initial text
-    updateModelText(config.value.name);
+    updateModelText(config.value.name, config.value.bagColor);
     
     // Start animation loop
     startAnimation();

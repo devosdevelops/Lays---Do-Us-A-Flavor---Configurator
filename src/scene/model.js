@@ -95,11 +95,150 @@ export function updateModelColor(hexColor) {
 }
 
 /**
- * Update model font/text material
- * @param {string} fontStyle - Font style identifier
+ * Calculate relative luminance of a color (for contrast checking)
+ * @param {string} hexColor - Hex color code
+ * @returns {number} Luminance value 0-1
  */
-export function updateModelFont(fontStyle) {
-  console.log('Model font updated to:', fontStyle);
+function getLuminance(hexColor) {
+  const hex = hexColor.replace('#', '');
+  const r = parseInt(hex.substr(0, 2), 16) / 255;
+  const g = parseInt(hex.substr(2, 2), 16) / 255;
+  const b = parseInt(hex.substr(4, 2), 16) / 255;
+  
+  // WCAG relative luminance formula
+  const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+  return luminance;
+}
+
+/**
+ * Get contrasting text color (white or black) based on background
+ * @param {string} hexColor - Background color
+ * @returns {string} Text color (#ffffff or #000000)
+ */
+function getContrastingTextColor(hexColor) {
+  return getLuminance(hexColor) > 0.5 ? '#000000' : '#ffffff';
+}
+
+/**
+ * Update model text - applies text to existing text material on the bag
+ * @param {string} flavorName - Name of the flavor to display on the bag
+ * @param {string} bagColor - Hex color of the bag for text background
+ */
+export function updateModelText(flavorName, bagColor) {
+  if (!loadedModel) {
+    console.warn('Model not loaded yet');
+    return;
+  }
+  
+  // Create canvas texture with flavor name
+  const canvas = document.createElement('canvas');
+  canvas.width = 2048;
+  canvas.height = 1024;
+  
+  const ctx = canvas.getContext('2d', { alpha: true });
+  
+  // Fill with bag color
+  ctx.fillStyle = bagColor;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+  // Flip canvas vertically (Three.js textures are upside down by default)
+  ctx.save();
+  ctx.translate(canvas.width / 2, canvas.height / 2);
+  ctx.scale(1, -1);
+  ctx.translate(-canvas.width / 2, -canvas.height / 2);
+  
+  // Draw text with contrasting color
+  const textColor = getContrastingTextColor(bagColor);
+  ctx.fillStyle = textColor;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  
+  // Word wrap logic with dynamic font sizing
+  const maxWidth = 1900;
+  const maxFontSize = 380;
+  const minFontSize = 150;
+  let fontSize = maxFontSize;
+  let lines = [];
+  
+  // Try to fit the text, reducing font size if needed
+  while (fontSize >= minFontSize) {
+    ctx.font = `bold ${fontSize}px Arial, sans-serif`;
+    lines = [];
+    let currentLine = '';
+    
+    const words = flavorName.split(' ');
+    let tooWide = false;
+    
+    words.forEach(word => {
+      const testLine = currentLine + (currentLine ? ' ' : '') + word;
+      const metrics = ctx.measureText(testLine);
+      
+      if (metrics.width > maxWidth) {
+        if (currentLine) lines.push(currentLine);
+        currentLine = word;
+        
+        // Check if even a single word is too wide
+        const wordMetrics = ctx.measureText(word);
+        if (wordMetrics.width > maxWidth) {
+          tooWide = true;
+        }
+      } else {
+        currentLine = testLine;
+      }
+    });
+    
+    if (currentLine) lines.push(currentLine);
+    
+    // If it fits or we're at min size, use this font size
+    if (!tooWide || fontSize === minFontSize) {
+      break;
+    }
+    
+    // Try smaller font
+    fontSize -= 30;
+  }
+  
+  // Draw lines centered
+  const lineHeight = fontSize + 50;
+  const totalHeight = lines.length * lineHeight;
+  let y = (canvas.height - totalHeight) / 2 + lineHeight / 2;
+  
+  lines.forEach(line => {
+    ctx.fillText(line, canvas.width / 2, y);
+    y += lineHeight;
+  });
+  
+  ctx.restore();
+  
+  // Create texture from canvas
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  
+  // Find and update text/label materials only
+  loadedModel.traverse((child) => {
+    if (child.isMesh && child.material) {
+      const materialName = child.material.name?.toLowerCase() || '';
+      const meshName = child.name?.toLowerCase() || '';
+      
+      // Only update text-related materials
+      const isText = (materialName.includes('text') || meshName.includes('text'));
+      
+      if (isText) {
+        if (Array.isArray(child.material)) {
+          child.material.forEach(mat => {
+            mat.map = texture;
+            mat.needsUpdate = true;
+          });
+        } else {
+          child.material.map = texture;
+          child.material.needsUpdate = true;
+        }
+        console.log(`Updated text on: ${child.name}`);
+      }
+    }
+  });
+  
+  console.log('Model text updated to:', flavorName, 'with', textColor, 'text (font size:', fontSize, 'px)');
 }
 
 /**
