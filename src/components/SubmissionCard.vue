@@ -1,18 +1,7 @@
 <template>
   <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-    <div 
-      :style="{ backgroundColor: submission.bagColor }" 
-      class="flex items-center justify-center h-32 relative"
-    >
-      <img 
-        v-if="submission.bagImageUrl"
-        :src="submission.bagImageUrl"
-        :alt="submission.flavorName"
-        class="w-full h-full object-cover"
-      />
-      <div v-else class="text-center text-white font-bold text-lg">
-        {{ submission.flavorName }}
-      </div>
+    <div class="h-32 overflow-hidden">
+      <BagPreviewCanvas :submission="submission" />
     </div>
     
     <div class="p-4">
@@ -53,6 +42,7 @@
 import { defineProps, ref } from 'vue';
 import { voteSubmission } from '../services/api.js';
 import { useAuth } from '../composables/useAuth.js';
+import BagPreviewCanvas from './BagPreviewCanvas.vue';
 
 const props = defineProps({
   submission: {
