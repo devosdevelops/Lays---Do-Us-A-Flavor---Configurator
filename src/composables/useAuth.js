@@ -25,85 +25,90 @@ function initAuth() {
   }
 }
 
+/**
+ * Login user with email and password
+ * @param {string} email
+ * @param {string} password
+ * @returns {Promise<{success: boolean, error?: string}>}
+ */
+async function login(email, password) {
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/users/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ email, password })
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      return { success: false, error: data.message || 'Login failed' };
+    }
+
+    const data = await response.json();
+    
+    // Store auth state
+    token.value = data.token;
+    user.value = data.user;
+    isLoggedIn.value = true;
+    
+    // Persist to localStorage
+    localStorage.setItem('auth', JSON.stringify({ token: data.token, user: data.user }));
+    
+    return { success: true };
+  } catch (error) {
+    console.error('Login error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Signup user with email and password and auto-login
+ * @param {string} username
+ * @param {string} email
+ * @param {string} password
+ * @returns {Promise<{success: boolean, error?: string}>}
+ */
+async function signup(username, email, password) {
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/users/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ username, email, password })
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      return { success: false, error: data.message || 'Signup failed' };
+    }
+
+    // Account created successfully, auto-login with provided credentials
+    return await login(email, password);
+  } catch (error) {
+    console.error('Signup error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Logout user
+ */
+function logout() {
+  token.value = null;
+  user.value = null;
+  isLoggedIn.value = false;
+  localStorage.removeItem('auth');
+}
+
 export function useAuth() {
   return {
     isLoggedIn: computed(() => isLoggedIn.value),
     user: computed(() => user.value),
     token: computed(() => token.value),
-    
-    /**
-     * Login user with email and password
-     * @param {string} email
-     * @param {string} password
-     * @returns {Promise<{success: boolean, error?: string}>}
-     */
-    async login(email, password) {
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/users/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
-        });
-
-        if (!response.ok) {
-          const data = await response.json();
-          return { success: false, error: data.message || 'Login failed' };
-        }
-
-        const data = await response.json();
-        
-        // Store auth state
-        token.value = data.token;
-        user.value = data.user;
-        isLoggedIn.value = true;
-        
-        // Persist to localStorage
-        localStorage.setItem('auth', JSON.stringify({ token: data.token, user: data.user }));
-        
-        return { success: true };
-      } catch (error) {
-        console.error('Login error:', error);
-        return { success: false, error: error.message };
-      }
-    },
-
-    /**
-     * Signup user with email and password
-     * @param {string} username
-     * @param {string} email
-     * @param {string} password
-     * @returns {Promise<{success: boolean, error?: string}>}
-     */
-    async signup(username, email, password) {
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/users/register`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, email, password })
-        });
-
-        if (!response.ok) {
-          const data = await response.json();
-          return { success: false, error: data.message || 'Signup failed' };
-        }
-
-        const data = await response.json();
-        return { success: true, user: data };
-      } catch (error) {
-        console.error('Signup error:', error);
-        return { success: false, error: error.message };
-      }
-    },
-
-    /**
-     * Logout user
-     */
-    logout() {
-      token.value = null;
-      user.value = null;
-      isLoggedIn.value = false;
-      localStorage.removeItem('auth');
-    }
+    login,
+    signup,
+    logout
   };
 }
 

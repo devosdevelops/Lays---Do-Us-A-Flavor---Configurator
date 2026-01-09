@@ -4,6 +4,10 @@
       <h1 class="text-3xl font-bold text-center mb-2">Join the Flavor Contest</h1>
       <p class="text-center text-gray-600 mb-8">Create your account to submit and vote</p>
       
+      <div v-if="error" class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+        {{ error }}
+      </div>
+      
       <form @submit.prevent="handleSignup" class="space-y-4">
         <div>
           <label for="username" class="block text-sm font-semibold mb-2">Username</label>
@@ -38,10 +42,14 @@
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-lay-yellow"
             placeholder="••••••••"
             required
+            minlength="6"
           />
+          <p class="text-xs text-gray-500 mt-1">Minimum 6 characters required</p>
         </div>
         
-        <button type="submit" class="btn-primary w-full text-center">Create Account</button>
+        <button type="submit" :disabled="loading" class="btn-primary w-full text-center" :class="{ 'opacity-50 cursor-not-allowed': loading }">
+          {{ loading ? 'Creating Account...' : 'Create Account' }}
+        </button>
       </form>
       
       <div class="mt-6 text-center">
@@ -58,19 +66,45 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { signup } from '../services/api.js';
+import { useAuth } from '../composables/useAuth.js';
 
 const router = useRouter();
+const { signup } = useAuth();
+
 const form = ref({
   username: '',
   email: '',
   password: ''
 });
 
+const loading = ref(false);
+const error = ref(null);
+
 const handleSignup = async () => {
-  // TODO: Call real signup API
-  console.log('Signup submitted:', form.value);
-  alert('Signup submitted (UI only - see console)');
+  error.value = null;
+
+  // Validate password length
+  if (form.value.password.length < 6) {
+    error.value = 'Password must be at least 6 characters long';
+    return;
+  }
+
+  loading.value = true;
+
+  try {
+    const result = await signup(form.value.username, form.value.email, form.value.password);
+    
+    if (result.success) {
+      // Auto-logged in, redirect to home
+      router.push('/');
+    } else {
+      error.value = result.error || 'Signup failed';
+    }
+  } catch (err) {
+    error.value = err.message || 'An unexpected error occurred';
+  } finally {
+    loading.value = false;
+  }
 };
 </script>
 
