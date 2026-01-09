@@ -23,7 +23,7 @@ export async function signup(username, email, password) {
   return { success: true, token: 'mock-token-12345' };
 }
 
-// Submit a new flavor design
+// Submit a new flavor design with optional image
 export async function submitDesign(designData) {
   try {
     // Get token from localStorage
@@ -34,69 +34,176 @@ export async function submitDesign(designData) {
     
     const { token } = JSON.parse(authData);
     
-    // Map config to API format
-    const payload = {
-      flavorName: designData.name,
+    // Create FormData for multipart submission
+    const formData = new FormData();
+    formData.append('flavorName', designData.name);
+    formData.append('bagColor', designData.bagColor);
+    formData.append('fontChoice', designData.fontStyle);
+    
+    // Append keyFlavors as array (backend expects this format)
+    if (designData.flavorNotes && Array.isArray(designData.flavorNotes)) {
+      formData.append('keyFlavors', JSON.stringify(designData.flavorNotes));
+    } else {
+      formData.append('keyFlavors', JSON.stringify([]));
+    }
+    
+    // Append image if present (backend handles Cloudinary upload)
+    if (designData.imageUpload) {
+      formData.append('image', designData.imageUpload);
+    }
+    
+    console.log('Submitting design with:', {
+      name: designData.name,
       bagColor: designData.bagColor,
-      fontChoice: designData.fontStyle,
-      keyFlavors: designData.flavorNotes
-    };
+      fontStyle: designData.fontStyle,
+      flavorNotes: designData.flavorNotes,
+      hasImage: !!designData.imageUpload
+    });
     
     const response = await fetch(`${API_BASE}/api/submissions`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
+        // Note: Do NOT set Content-Type for FormData - browser handles it automatically
       },
       credentials: 'include',
-      body: JSON.stringify(payload)
+      body: formData
     });
     
+    const responseData = await response.json();
+    
     if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.message || 'Failed to submit design');
+      console.error('API error response:', responseData);
+      throw new Error(responseData.message || responseData.error || responseData.errors?.join(', ') || 'Failed to submit design');
     }
     
-    const data = await response.json();
-    console.log('Design submitted:', data);
-    return { success: true, submissionId: data._id };
+    console.log('Design submitted:', responseData);
+    console.log('Image URL:', responseData.bagImageUrl);
+    return { success: true, submissionId: responseData._id, bagImageUrl: responseData.bagImageUrl };
   } catch (error) {
     console.error('Submit design error:', error);
     throw error;
   }
 }
 
-// TODO: Implement real voting
+// Vote on a submission
 export async function voteSubmission(submissionId) {
-  console.log('API: voteSubmission called', { submissionId });
-  // TODO: POST /api/submissions/:submissionId/vote with Authorization header
-  return { success: true, votes: 42 };
+  try {
+    // Get token from localStorage
+    const authData = localStorage.getItem('auth');
+    if (!authData) {
+      throw new Error('Not authenticated');
+    }
+    
+    const { token } = JSON.parse(authData);
+    
+    const response = await fetch(`${API_BASE}/api/votes`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      credentials: 'include',
+      body: JSON.stringify({ submissionId })
+    });
+    
+    if (!response.ok) {
+      const data = await response.json();
+      // 409 means user already voted on this submission
+      if (response.status === 409) {
+        throw new Error('You have already voted on this submission');
+      }
+      throw new Error(data.message || 'Failed to vote');
+    }
+    
+    const data = await response.json();
+    console.log('Vote submitted:', data);
+    return { success: true, vote: data };
+  } catch (error) {
+    console.error('Vote submission error:', error);
+    throw error;
+  }
 }
 
-// TODO: Implement real submissions fetch
+// Get all submissions (public endpoint)
 export async function getSubmissions() {
-  console.log('API: getSubmissions called');
-  // TODO: GET /api/submissions (public endpoint)
-  return [];
+  try {
+    const response = await fetch(`${API_BASE}/api/submissions`);
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch submissions');
+    }
+    
+    const submissions = await response.json();
+    console.log('Fetched submissions:', submissions);
+    return submissions;
+  } catch (error) {
+    console.error('Get submissions error:', error);
+    throw error;
+  }
 }
 
-// TODO: Implement user submissions fetch
-export async function getUserSubmissions(userId) {
-  console.log('API: getUserSubmissions called', { userId });
-  // TODO: GET /api/users/:userId/submissions with Authorization header
-  return [];
+// Get current user's submissions
+export async function getUserSubmissions() {
+  try {
+    // Get token from localStorage
+    const authData = localStorage.getItem('auth');
+    if (!authData) {
+      throw new Error('Not authenticated');
+    }
+    
+    const { token } = JSON.parse(authData);
+    
+    const response = await fetch(`${API_BASE}/api/submissions/my`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      credentials: 'include'
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch your submissions');
+    }
+    
+    const submissions = await response.json();
+    console.log('Fetched user submissions:', submissions);
+    return submissions;
+  } catch (error) {
+    console.error('Get user submissions error:', error);
+    throw error;
+  }
 }
 
-// TODO: Implement submission deletion
+// Delete a submission
 export async function deleteSubmission(submissionId) {
-  console.log('API: deleteSubmission called', { submissionId });
-  // TODO: DELETE /api/submissions/:submissionId with Authorization header
-  return { success: true };
-}
-
-// TODO: Implement submission editing
-export async function updateSubmission(submissionId, updates) {
-  console.log('API: updateSubmission called', { submissionId, updates });
-  // TODO: PUT /api/submissions/:submissionId with Authorization header
-  return { success: true };
+  try {
+    // Get token from localStorage
+    const authData = localStorage.getItem('auth');
+    if (!authData) {
+      throw new Error('Not authenticated');
+    }
+    
+    const { token } = JSON.parse(authData);
+    
+    const response = await fetch(`${API_BASE}/api/submissions/${submissionId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      credentials: 'include'
+    });
+    
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message || 'Failed to delete submission');
+    }
+    
+    const data = await response.json();
+    console.log('Submission deleted:', data);
+    return { success: true, deletedId: data._id };
+  } catch (error) {
+    console.error('Delete submission error:', error);
+    throw error;
+  }
 }

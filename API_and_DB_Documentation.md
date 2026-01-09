@@ -84,6 +84,7 @@ Authorization: Bearer <token>
   "bagColor": "string (hex color code, e.g. #FF5733)",
   "fontChoice": "string (design choice)",
   "keyFlavors": "array of strings (optional)",
+  "bagImageUrl": "string (optional, URL to bag design image)",
   "voteCount": "number (auto-incremented)",
   "hasWon": "boolean (default: false)",
   "createdAt": "date",
@@ -95,6 +96,8 @@ Authorization: Bearer <token>
 - Each user can submit multiple flavors
 - Vote count updates automatically when votes are cast
 - Hex color format is required for bagColor
+- `bagImageUrl` is optional - submissions without it are still valid
+- `bagImageUrl` accepts any valid URL string (typically from Cloudinary or other image CDN)
 - Only one submission can have `hasWon: true` at a time
 - Admins can select a winner regardless of vote count
 
@@ -235,7 +238,8 @@ Content-Type: application/json
   "flavorName": "string (required, 2-100 characters)",
   "bagColor": "string (required, hex color code)",
   "fontChoice": "string (required)",
-  "keyFlavors": ["string", "string"] (optional array)
+  "keyFlavors": ["string", "string"] (optional array),
+  "bagImageUrl": "string (optional, URL to bag design image)"
 }
 ```
 
@@ -248,6 +252,7 @@ Content-Type: application/json
   "bagColor": "string",
   "fontChoice": "string",
   "keyFlavors": ["string"],
+  "bagImageUrl": "string or null",
   "voteCount": 0,
   "createdAt": "date",
   "updatedAt": "date"
@@ -277,6 +282,7 @@ Get all submissions. **Public route - no authentication required.**
     "bagColor": "string",
     "fontChoice": "string",
     "keyFlavors": ["string"],
+    "bagImageUrl": "string or null",
     "voteCount": "number",
     "createdAt": "date",
     "updatedAt": "date"
@@ -305,6 +311,7 @@ Authorization: Bearer <token>
     "bagColor": "string",
     "fontChoice": "string",
     "keyFlavors": ["string"],
+    "bagImageUrl": "string or null",
     "voteCount": "number",
     "createdAt": "date",
     "updatedAt": "date"

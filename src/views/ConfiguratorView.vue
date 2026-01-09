@@ -238,11 +238,13 @@ const handleImageUpload = (event) => {
   const file = event.target.files[0];
   if (!file) return;
   
+  // Store the File object for uploading later
+  config.value.imageUpload = file;
+  
   const reader = new FileReader();
   reader.onload = (e) => {
     const img = new Image();
     img.onload = () => {
-      config.value.imageUpload = e.target.result;
       updateModelImage(img);
       console.log('Image loaded:', file.name);
     };
